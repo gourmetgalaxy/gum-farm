@@ -1,17 +1,17 @@
-pragma solidity ^0.5.8;
+pragma solidity 0.5.8;
 
 import './Ownable.sol';
 import './ERC20.sol';
 
 contract GumToken is ERC20('GumToken', 'GUM', 20e6 * 1e18, address(this)), Ownable {
 
-  uint private teamAllocation = 3e6 * 1e18;
-  uint private communityAllocation = 5e4 * 1e18;
-  uint private adviserAllocation = 1e6 * 1e18;
-  uint private farmingAllocation = 9950000 * 1e18;
-  uint private marketingAllocation = 5e5 * 1e18;
-  uint private privateSaleAllocation = 5e6 * 1e18;
-  uint private publicSaleAllocation = 5e5 * 1e18;
+  uint private constant teamAllocation = 3e6 * 1e18;
+  uint private constant communityAllocation = 5e4 * 1e18;
+  uint private constant adviserAllocation = 1e6 * 1e18;
+  uint private constant farmingAllocation = 9950000 * 1e18;
+  uint private constant marketingAllocation = 5e5 * 1e18;
+  uint private constant privateSaleAllocation = 5e6 * 1e18;
+  uint private constant publicSaleAllocation = 5e5 * 1e18;
 
   uint private teamReleased = 0;
   uint private communityReleased = 0;
@@ -26,11 +26,11 @@ contract GumToken is ERC20('GumToken', 'GUM', 20e6 * 1e18, address(this)), Ownab
   uint private lastMarketingReleased = now + 30 days;
   uint private lastPrivateSaleReleased = now + 30 days;
 
-  uint private amountEachTeamRelease = 150000 * 1e18;
-  uint private amountEachCommunityRelease = 2500 * 1e18;
-  uint private amountEachAdviserRelease = 50000 * 1e18;
-  uint private amountEachMarketingRelease = 125000 * 1e18;
-  uint private amountEachPrivateSaleRelease = 1e6 * 1e18;
+  uint private constant amountEachTeamRelease = 150000 * 1e18;
+  uint private constant amountEachCommunityRelease = 2500 * 1e18;
+  uint private constant amountEachAdviserRelease = 50000 * 1e18;
+  uint private constant amountEachMarketingRelease = 125000 * 1e18;
+  uint private constant amountEachPrivateSaleRelease = 1e6 * 1e18;
 
   constructor(
     address _marketingTGEAddress,
