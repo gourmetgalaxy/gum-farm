@@ -1,4 +1,4 @@
-pragma solidity ^0.5.8;
+pragma solidity 0.5.8;
 
 import './IERC20.sol';
 import './SafeMath.sol';
@@ -25,17 +25,17 @@ contract Galaxy is Ownable {
   GumToken public gum;
   uint256 public bonusEndBlock;
   uint256 public rewardsEndBlock;
-  uint256 public gumPerBlock = 1e18;
+  uint256 public constant gumPerBlock = 1e18;
   uint256 public constant BONUS_MULTIPLIER = 3;
 
   PoolInfo[] public poolInfo;
   mapping(address => bool) public lpTokenExistsInPool;
   mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-  uint256 public totalAllocPoint = 0;
+  uint256 public totalAllocPoint;
   uint256 public startBlock;
 
-  uint256 public blockIn2Weeks = 80640;
-  uint256 public blockIn2Years = 4204800;
+  uint256 public constant blockIn2Weeks = 80640;
+  uint256 public constant blockIn2Years = 4204800;
 
   event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
   event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -84,13 +84,6 @@ contract Galaxy is Ownable {
       })
     );
     lpTokenExistsInPool[address(_lpToken)] = true;
-  }
-
-  function updateLpTokenExists(address _lpTokenAddr, bool _isExists)
-  external
-  onlyOwner
-  {
-    lpTokenExistsInPool[_lpTokenAddr] = _isExists;
   }
 
   function set(
@@ -201,10 +194,7 @@ contract Galaxy is Ownable {
   function withdraw(uint256 _pid, uint256 _amount) public {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
-    require(
-      user.amount >= _amount,
-      'Galaxy: Insufficient Amount to withdraw'
-    );
+    require(user.amount >= _amount, 'Galaxy: Insufficient Amount to withdraw');
     updatePool(_pid);
     uint256 pending = user.amount.mul(pool.accGumPerShare).div(1e12).sub(user.rewardDebt);
     safeGumTransfer(msg.sender, pending);
@@ -217,6 +207,7 @@ contract Galaxy is Ownable {
   function emergencyWithdraw(uint256 _pid) public {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
+    require(user.amount > 0, 'Galaxy: insufficient balance');
     pool.lpToken.safeTransfer(address(msg.sender), user.amount);
     emit EmergencyWithdraw(msg.sender, _pid, user.amount);
     user.amount = 0;
