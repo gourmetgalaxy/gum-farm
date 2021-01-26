@@ -197,21 +197,26 @@ contract Galaxy is Ownable {
     require(user.amount >= _amount, 'Galaxy: Insufficient Amount to withdraw');
     updatePool(_pid);
     uint256 pending = user.amount.mul(pool.accGumPerShare).div(1e12).sub(user.rewardDebt);
-    safeGumTransfer(msg.sender, pending);
-    user.amount = user.amount.sub(_amount);
+    if(pending > 0) {
+      safeGumTransfer(msg.sender, pending);
+    }
+    if(_amount > 0) {
+      user.amount = user.amount.sub(_amount);
+      pool.lpToken.safeTransfer(address(msg.sender), _amount);
+    }
     user.rewardDebt = user.amount.mul(pool.accGumPerShare).div(1e12);
-    pool.lpToken.safeTransfer(address(msg.sender), _amount);
     emit Withdraw(msg.sender, _pid, _amount);
   }
 
   function emergencyWithdraw(uint256 _pid) public {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
-    require(user.amount > 0, 'Galaxy: insufficient balance');
-    pool.lpToken.safeTransfer(address(msg.sender), user.amount);
-    emit EmergencyWithdraw(msg.sender, _pid, user.amount);
+    uint256 amount = user.amount;
+    require(amount > 0, 'Galaxy: insufficient balance');
     user.amount = 0;
     user.rewardDebt = 0;
+    pool.lpToken.safeTransfer(address(msg.sender), amount);
+    emit EmergencyWithdraw(msg.sender, _pid, amount);
   }
 
   function safeGumTransfer(address _to, uint256 _amount) internal {
