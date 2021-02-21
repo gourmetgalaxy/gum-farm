@@ -23,7 +23,7 @@ contract EtherGalaxy is Ownable {
 
   uint256 public bonusEndBlock;
   uint256 public rewardsEndBlock;
-  uint256 public constant ethPerBlock = 173611111111111 wei; // 1ETH / 5760 blocks
+  uint256 public constant ethPerBlock = 57870370370370 wei; // 10ETH / 172800 blocks
   uint256 public constant BONUS_MULTIPLIER = 3;
 
   PoolInfo[] public poolInfo;
@@ -165,12 +165,15 @@ contract EtherGalaxy is Ownable {
   }
 
   function deposit(uint256 _pid, uint256 _amount) public {
+    require(_amount > 0, 'Galaxy: invalid amount');
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
     updatePool(_pid);
     if (user.amount > 0) {
       uint256 pending = user.amount.mul(pool.accEtherPerShare).div(1e12).sub(user.rewardDebt);
-      safeEtherTransfer(msg.sender, pending);
+      if (pending > 0) {
+        safeEtherTransfer(msg.sender, pending);
+      }
     }
     pool.lpToken.safeTransferFrom(
       address(msg.sender),
@@ -211,11 +214,14 @@ contract EtherGalaxy is Ownable {
   }
 
   function safeEtherTransfer(address payable _to, uint256 _amount) internal {
-    require(address(this).balance >= _amount, 'Contract is insufficient balance!');
-    _to.transfer(_amount);
+    if (address(this).balance >= _amount) {
+      _to.transfer(_amount);
+    } else {
+      _to.transfer(address(this).balance);
+    }
   }
 
-  function isRewardsActive() public view returns (bool) {
+  function areRewardsActive() public view returns (bool) {
     return rewardsEndBlock > block.number;
   }
 
